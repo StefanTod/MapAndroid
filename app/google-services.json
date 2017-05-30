@@ -1,0 +1,45 @@
+{
+  "project_info": {
+    "project_number": "485551805309",
+    "firebase_url": "https://maps-ff0ff.firebaseio.com",
+    "project_id": "maps-ff0ff",
+    "storage_bucket": "maps-ff0ff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:485551805309:android:80b31e33bb4053cb",
+        "android_client_info": {
+          "package_name": "eu.toolegit.stefan.map"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "485551805309-87bslfhqsbbopaktuffolb1dfa4mp84o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI3KSXYg4EKW9gK5edMOHvFwPO3sSI5QM"
+        },
+        {
+          "current_key": "AIzaSyA5mRCFK763wSEhKfm1hZ9tnR6n16PfWBI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

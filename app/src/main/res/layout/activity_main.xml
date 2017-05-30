@@ -22,4 +22,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <Button
+        android:id="@+id/btn_sign_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Out"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="391dp"
+        android:onClick="onClick"/>
+
 </android.support.constraint.ConstraintLayout>
