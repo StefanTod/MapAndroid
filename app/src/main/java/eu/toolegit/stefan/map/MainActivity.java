@@ -36,13 +36,31 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ChildEventListener{
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Marker mCurrLocationMarker;
+    private DatabaseReference mDatabase;
+    private HashMap<UserLocation, Marker> mMarkers;
+    private FirebaseUser mUser;
+    private boolean firstTimeZoom = false;
+
+    private static final int NAV_HEIGHT = 190;
+    private static final int INITIAL_ZOOM = 16;
+    private static final float ICON_SIZE = 32f;
+    private static final float MARKER_COLOUR = BitmapDescriptorFactory.HUE_RED;
 
 
     @Override
@@ -98,10 +116,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
 
+
+
+
+
         // Request location permission.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                checkLocationPermission();
             }
+
+        mUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (mUser == null) {
+            throw new NullPointerException("User not logged in");
+        }
+
+        mMarkers = new HashMap<>();
+
+        mDatabase = FirebaseDatabase.getInstance().getReference("locations");
+
+        mDatabase.addChildEventListener(this);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -135,20 +169,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
-        // Place current location marker
-        //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
+
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        if (!firstTimeZoom) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(INITIAL_ZOOM));
+            firstTimeZoom = true;
+        }
+
+        updateLocation(mUser.getUid(), latLng, mUser.getDisplayName());
+
+//        // Update location in the database.
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        if (user != null) {
+//            updateLocation(user.getUid(), latLng);
+//        } else {
+//            Log.e("AUTH", "USER NOT LOGGED IN");
+//            // TODO: Handle appropriately.
+//        }
     }
 
 
@@ -211,6 +250,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        addMarker(dataSnapshot);
+    }
+
+    @Override
+    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        addMarker(dataSnapshot);
+    }
+
+    @Override
+    public void onChildRemoved(DataSnapshot dataSnapshot) {
+        String uid = dataSnapshot.getKey();
+        // Check and remove any duplicates.
+        for (UserLocation loc : mMarkers.keySet()) {
+            if (loc.uid.equals(uid)) {
+                mMarkers.remove(loc).remove();
+            }
+        }
+    }
+
+    @Override
+    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+        Log.v("DATABASE", "onChildMoved");
+    }
+
+    @Override
+    public void onCancelled(DatabaseError databaseError) {
+        Log.d("DATABASE", databaseError.getMessage() + databaseError.getDetails());
+    }
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -260,5 +330,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     });
         }
+    }
+
+    private void updateLocation(String userId, LatLng latLng, String name) {
+        BaseLocation loc = new BaseLocation(latLng.latitude, latLng.longitude, name);
+        mDatabase.child(userId).setValue(loc);
+
+//        UserLocation loc = new UserLocation(latLng.latitude, latLng.longitude);
+//        mDatabase.child("users").child(userId).child("location").setValue(loc);
+    }
+
+    private void addMarker(DataSnapshot dataSnapshot) {
+        BaseLocation simpleLocation = dataSnapshot.getValue(BaseLocation.class);
+        String uid = dataSnapshot.getKey();
+        // Don't place markers for yourself.
+        if (uid.equals(mUser.getUid())) {
+            return;
+        }
+        // TODO: Don't allow markers to jump huge distances.
+        // Check and remove any duplicates.
+        for (UserLocation loc : mMarkers.keySet()) {
+            if (loc.uid.equals(uid)) {
+                mMarkers.remove(loc).remove();
+            }
+        }
+        UserLocation userLocation = new UserLocation(simpleLocation, uid);
+        MarkerOptions newMarker = userLocation.getMarkerOptions(MARKER_COLOUR);
+        mMarkers.put(userLocation, mMap.addMarker(newMarker));
     }
 }
