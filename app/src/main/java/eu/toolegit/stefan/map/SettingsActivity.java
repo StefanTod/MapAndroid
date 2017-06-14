@@ -8,12 +8,12 @@ import android.os.Bundle;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
-public class ProfileActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_settings);
 
         AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
 
@@ -38,8 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
         bottomNavigation.setForceTint(true);
 
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
-        bottomNavigation.setCurrentItem(1);
-
+        bottomNavigation.setCurrentItem(2);
 
 
 
@@ -67,6 +66,6 @@ public class ProfileActivity extends AppCompatActivity {
                 }
                 return true;
             }
-        });
+            });
     }
 }

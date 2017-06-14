@@ -49,6 +49,7 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ChildEventListener{
 
+
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Marker mCurrLocationMarker;
@@ -60,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int NAV_HEIGHT = 190;
     private static final int INITIAL_ZOOM = 16;
     private static final float ICON_SIZE = 32f;
-    private static final float MARKER_COLOUR = BitmapDescriptorFactory.HUE_RED;
+    private static final float MARKER_COLOUR = BitmapDescriptorFactory.HUE_GREEN;
+    private static final float MARKER_COLOUR_ME = BitmapDescriptorFactory.HUE_BLUE;
 
 
     @Override
@@ -89,26 +91,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomNavigation.setAccentColor(Color.parseColor("#F63D2B"));
         bottomNavigation.setInactiveColor(Color.parseColor("#747474"));
 // Force to tint the drawable (useful for font with icon for example)
-        bottomNavigation.setForceTint(true);
+        bottomNavigation.setForceTint(false);
 
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
+        bottomNavigation.setCurrentItem(0);
 
-        AHNotification notification = new AHNotification.Builder()
-                .setText("1")
-                .setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.color_notification_back))
-                .setTextColor(ContextCompat.getColor(MainActivity.this, R.color.color_notification_text))
-                .build();
-        bottomNavigation.setNotification(notification, 1);
+
 
 
         // Set listeners
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
+                Intent in;
                 switch (position) {
-                    case 2:
+                    case 0:
+                        in = new Intent(getBaseContext(), MainActivity.class);
+                        in.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivityIfNeeded(in, 0);
                         break;
-                    case 3:
+                    case 1:
+                        in = new Intent(getBaseContext(), ProfileActivity.class);
+                        in.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivityIfNeeded(in, 0);
+                        break;
+                    case 2:
+                        in = new Intent(getBaseContext(), SettingsActivity.class);
+                        in.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivityIfNeeded(in, 0);
                         break;
                 }
                 return true;
@@ -342,20 +352,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void addMarker(DataSnapshot dataSnapshot) {
         BaseLocation simpleLocation = dataSnapshot.getValue(BaseLocation.class);
-        String uid = dataSnapshot.getKey();
-        // Don't place markers for yourself.
-        if (uid.equals(mUser.getUid())) {
-            return;
-        }
+        //String uid = dataSnapshot.getKey();
+        UserLocation userLocation = new UserLocation(simpleLocation, dataSnapshot.getKey());
+
         // TODO: Don't allow markers to jump huge distances.
         // Check and remove any duplicates.
-        for (UserLocation loc : mMarkers.keySet()) {
-            if (loc.uid.equals(uid)) {
-                mMarkers.remove(loc).remove();
+        //for (UserLocation loc : mMarkers.keySet()) {
+            if (mMarkers.get(dataSnapshot.getKey()) != null) {
+                mMarkers.remove(dataSnapshot.getKey());
+
             }
-        }
-        UserLocation userLocation = new UserLocation(simpleLocation, uid);
+        //}
+
         MarkerOptions newMarker = userLocation.getMarkerOptions(MARKER_COLOUR);
+        // Don't place markers for yourself.
+        if (dataSnapshot.getKey().equals(mUser.getUid())) {
+            newMarker = userLocation.getMarkerOptions(MARKER_COLOUR_ME);
+            mMarkers.put(userLocation, mMap.addMarker(newMarker));
+
+        }
         mMarkers.put(userLocation, mMap.addMarker(newMarker));
     }
 }
