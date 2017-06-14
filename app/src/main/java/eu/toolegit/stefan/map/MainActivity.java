@@ -1,6 +1,7 @@
 package eu.toolegit.stefan.map;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -57,12 +59,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private HashMap<UserLocation, Marker> mMarkers;
     private FirebaseUser mUser;
     private boolean firstTimeZoom = false;
+    private NotificationCompat.Builder mBuilder;
+    private NotificationManager mNotifyMgr;
 
     private static final int NAV_HEIGHT = 190;
     private static final int INITIAL_ZOOM = 16;
     private static final float ICON_SIZE = 32f;
     private static final float MARKER_COLOUR = BitmapDescriptorFactory.HUE_GREEN;
     private static final float MARKER_COLOUR_ME = BitmapDescriptorFactory.HUE_BLUE;
+
+    private Location userLocation = new Location("UserLocation");
+    private Location otherUsersLocation = new Location("otherUserLocation");;
 
 
     @Override
@@ -188,6 +195,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             firstTimeZoom = true;
         }
 
+        userLocation = location;
+        checkNotification();
+
         updateLocation(mUser.getUid(), latLng, mUser.getDisplayName());
 
 //        // Update location in the database.
@@ -263,11 +273,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         addMarker(dataSnapshot);
+
+        BaseLocation simpleLocation = dataSnapshot.getValue(BaseLocation.class);
+        otherUsersLocation.setLatitude(simpleLocation.lat);
+        otherUsersLocation.setLongitude(simpleLocation.longt);
+
+        checkNotification();
     }
 
     @Override
     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
         addMarker(dataSnapshot);
+
+        BaseLocation simpleLocation = dataSnapshot.getValue(BaseLocation.class);
+        otherUsersLocation.setLatitude(simpleLocation.lat);
+        otherUsersLocation.setLongitude(simpleLocation.longt);
+
+        checkNotification();
     }
 
     @Override
@@ -372,5 +394,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
         mMarkers.put(userLocation, mMap.addMarker(newMarker));
+    }
+
+    public void checkNotification(){
+        Float distance = userLocation.distanceTo(otherUsersLocation);
+        Log.e("LOCATION",("Distance between users is" + distance));
+
+         mBuilder = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
+                        .setContentTitle("User is near you!")
+                        .setContentText("Someone is approximately 10 meters alway from you! Go check who it is!");
+
+        if(distance < 10) {
+            // Sets an ID for the notification
+            int mNotificationId = 001;
+            // Gets an instance of the NotificationManager service
+            mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            // Builds the notification and issues it.
+            mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        }
     }
 }

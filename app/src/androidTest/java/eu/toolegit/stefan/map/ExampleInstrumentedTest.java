@@ -23,4 +23,7 @@ public class ExampleInstrumentedTest {
 
         assertEquals("eu.toolegit.stefan.map", appContext.getPackageName());
     }
+
+    @Test
+    public void 
 }
