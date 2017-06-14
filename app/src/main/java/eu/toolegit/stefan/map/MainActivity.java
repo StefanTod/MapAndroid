@@ -2,12 +2,14 @@ package eu.toolegit.stefan.map;
 
 import android.Manifest;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -379,12 +381,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // TODO: Don't allow markers to jump huge distances.
         // Check and remove any duplicates.
-        //for (UserLocation loc : mMarkers.keySet()) {
+        for (UserLocation loc : mMarkers.keySet()) {
             if (mMarkers.get(dataSnapshot.getKey()) != null) {
                 mMarkers.remove(dataSnapshot.getKey());
 
             }
-        //}
+        }
 
         MarkerOptions newMarker = userLocation.getMarkerOptions(MARKER_COLOUR);
         // Don't place markers for yourself.
@@ -403,9 +405,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
          mBuilder = new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
                         .setContentTitle("User is near you!")
-                        .setContentText("Someone is approximately 10 meters alway from you! Go check who it is!");
+                        .setContentText("Someone is approximately 10 meters alway! Check who!?");
 
         if(distance < 10) {
+            //Vibrate BZZZ
+            Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+            // Vibrate for 500 milliseconds
+            v.vibrate(2000);
             // Sets an ID for the notification
             int mNotificationId = 001;
             // Gets an instance of the NotificationManager service
