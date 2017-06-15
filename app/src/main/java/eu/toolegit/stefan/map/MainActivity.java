@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private Marker mCurrLocationMarker;
     private DatabaseReference mDatabase;
-    private HashMap<UserLocation, Marker> mMarkers;
+    private HashMap<String, Marker> mMarkers;
     private FirebaseUser mUser;
     private boolean firstTimeZoom = false;
     private NotificationCompat.Builder mBuilder;
@@ -298,11 +298,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onChildRemoved(DataSnapshot dataSnapshot) {
         String uid = dataSnapshot.getKey();
         // Check and remove any duplicates.
-        for (UserLocation loc : mMarkers.keySet()) {
-            if (loc.uid.equals(uid)) {
-                mMarkers.remove(loc).remove();
-            }
+        //for (UserLocation loc : mMarkers.keySet()) {
+        if (mMarkers.get(dataSnapshot.getKey()) != null) {
+            mMarkers.get(dataSnapshot.getKey()).remove();
+            Log.e("EVENT","We made it!");
         }
+        //}
     }
 
     @Override
@@ -376,31 +377,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void addMarker(DataSnapshot dataSnapshot) {
         BaseLocation simpleLocation = dataSnapshot.getValue(BaseLocation.class);
-        //String uid = dataSnapshot.getKey();
+        //Marker uid = mMarkers.get(dataSnapshot.getKey());
         UserLocation userLocation = new UserLocation(simpleLocation, dataSnapshot.getKey());
 
-        // TODO: Don't allow markers to jump huge distances.
-        // Check and remove any duplicates.
-        for (UserLocation loc : mMarkers.keySet()) {
-            if (mMarkers.get(dataSnapshot.getKey()) != null) {
-                mMarkers.remove(dataSnapshot.getKey());
 
+        // Check and remove any duplicates.
+        //for (UserLocation loc : mMarkers.keySet()) {
+            if (mMarkers.get(dataSnapshot.getKey()) != null) {
+                mMarkers.remove(dataSnapshot.getKey()).remove();
+                Log.e("EVENT","We made it!");
             }
-        }
+        //}
+
+
+
+        //}
 
         MarkerOptions newMarker = userLocation.getMarkerOptions(MARKER_COLOUR);
         // Don't place markers for yourself.
         if (dataSnapshot.getKey().equals(mUser.getUid())) {
             newMarker = userLocation.getMarkerOptions(MARKER_COLOUR_ME);
-            mMarkers.put(userLocation, mMap.addMarker(newMarker));
+            mMarkers.put(dataSnapshot.getKey(), mMap.addMarker(newMarker));
 
+        }else{
+            mMarkers.put(dataSnapshot.getKey(), mMap.addMarker(newMarker));
         }
-        mMarkers.put(userLocation, mMap.addMarker(newMarker));
     }
 
     public void checkNotification(){
         Float distance = userLocation.distanceTo(otherUsersLocation);
-        Log.e("LOCATION",("Distance between users is" + distance));
+        Log.e("LOCATION",("Distance between users is " + distance));
 
          mBuilder = new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
