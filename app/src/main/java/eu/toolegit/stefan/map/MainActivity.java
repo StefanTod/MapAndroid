@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         } else {
-            Log.e("PERMISSIONS", "USER DENIED LOCATION PERMISSION");
+            //Log.e("PERMISSIONS", "USER DENIED LOCATION PERMISSION");
             // TODO: Handle the option of the user denying location permission.
         }
     }
@@ -301,19 +301,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //for (UserLocation loc : mMarkers.keySet()) {
         if (mMarkers.get(dataSnapshot.getKey()) != null) {
             mMarkers.get(dataSnapshot.getKey()).remove();
-            Log.e("EVENT","We made it!");
+            //Log.e("EVENT","We made it!");
         }
         //}
     }
 
     @Override
     public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-        Log.v("DATABASE", "onChildMoved");
+        //Log.v("DATABASE", "onChildMoved");
     }
 
     @Override
     public void onCancelled(DatabaseError databaseError) {
-        Log.d("DATABASE", databaseError.getMessage() + databaseError.getDetails());
+        //Log.d("DATABASE", databaseError.getMessage() + databaseError.getDetails());
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //for (UserLocation loc : mMarkers.keySet()) {
             if (mMarkers.get(dataSnapshot.getKey()) != null) {
                 mMarkers.remove(dataSnapshot.getKey()).remove();
-                Log.e("EVENT","We made it!");
+               // Log.e("EVENT","We made it!");
             }
         //}
 
@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void checkNotification(){
         Float distance = userLocation.distanceTo(otherUsersLocation);
-        Log.e("LOCATION",("Distance between users is " + distance));
+       // Log.e("LOCATION",("Distance between users is " + distance));
 
          mBuilder = new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)

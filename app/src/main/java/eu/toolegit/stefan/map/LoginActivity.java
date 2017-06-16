@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         // Check if the user is signed in yet.
         if (auth.getCurrentUser() != null) {
             // User is already signed in.
-            Log.v("AUTH", "Logged in as " + auth.getCurrentUser().getEmail());
+           // Log.v("AUTH", "Logged in as " + auth.getCurrentUser().getEmail());
 
             // TODO: Check if user profile data is complete, if not, start the details activity anyway.
             Intent i = new Intent(this, MainActivity.class);
