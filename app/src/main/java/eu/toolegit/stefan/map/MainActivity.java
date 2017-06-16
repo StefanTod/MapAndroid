@@ -353,19 +353,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void onClick(View view) {
-        if (view.getId() == R.id.btn_sign_out) {
-            AuthUI.getInstance()
-                    .signOut(this)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        public void onComplete(@NonNull Task<Void> task) {
-                            // user is now signed out
-                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                            finish();
-                        }
-                    });
-        }
-    }
+
 
     private void updateLocation(String userId, LatLng latLng, String name) {
         BaseLocation loc = new BaseLocation(latLng.latitude, latLng.longitude, name);

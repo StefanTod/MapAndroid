@@ -5,4 +5,5 @@
     <color name="colorAccent">#ff404a</color>
     <color name="color_notification_back">#6c6c6c</color>
     <color name="color_notification_text">#ffffff</color>
+    <color name="background_color">#265B6A</color>
 </resources>
